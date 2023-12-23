@@ -22,6 +22,7 @@ return new class extends Migration
             $table->boolean('is_available')->default(false);
             $table->timestamp('available_from');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

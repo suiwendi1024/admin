@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory,
+        HasChildren;
 
     protected $fillable = [
         'user_id',
@@ -22,10 +23,6 @@ class Comment extends Model
         'user_id',
         'commentable_type',
         'commentable_id',
-    ];
-
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     protected $with = [

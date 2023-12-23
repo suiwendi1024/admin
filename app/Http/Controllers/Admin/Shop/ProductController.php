@@ -1,42 +1,28 @@
 <?php
 
-namespace App\Http\Controllers\Shop;
+namespace App\Http\Controllers\Admin\Shop;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
-use App\Models\User;
+use App\Http\Resources\Admin\Shop\ProductResource;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
-class OrderController extends Controller
+class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $orders = Order::latest('id')
-            ->select([
-                'id',
-                'customer_name' => User::select('name')
-                    ->whereColumn('users.id', 'user_id')
-                    ->limit(1),
-                'total',
-                'created_at'
-            ])
+        $products = Product::latest('id')
             ->when($request->search, function (Builder $query) use ($request) {
-                return $query->whereHas('customer', function (Builder $q) use ($request) {
-                    return $q->where('name', 'like', "%{$request->search}%");
-                });
+                return $query->where('name', 'like', "%{$request->search}%");
             })
-            ->with('customer')
             ->paginate($request->perPage);
-        $orders->makeHidden([
-            'customer',
-        ]);
-
-        return inertia('Shop/Orders/Index', [
-            'orders' => fn() => $orders,
+        return inertia('Shop/Products/Index', [
+            'products' => fn () => ProductResource::collection($products),
         ]);
     }
 
@@ -59,7 +45,7 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Order $order)
+    public function show(Product $product)
     {
         //
     }
@@ -67,7 +53,7 @@ class OrderController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Order $order)
+    public function edit(Product $product)
     {
         //
     }
@@ -75,7 +61,7 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Order $order)
+    public function update(Request $request, Product $product)
     {
         //
     }
@@ -83,7 +69,7 @@ class OrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Order $order)
+    public function destroy(Product $product)
     {
         //
     }

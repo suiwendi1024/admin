@@ -1,43 +1,31 @@
 <?php
 
-namespace App\Http\Controllers\Shop;
+namespace App\Http\Controllers\Admin\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\Shop\CategoryResource;
 use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
-class ProductController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $products = Product::latest('id')
-            ->select([
-                'id',
-                'name',
-                'category' => Category::select('name')
-                    ->whereColumn('categories.id', 'category_id')
-                    ->limit(1),
-                'price',
-                'cost',
-                'stock',
-                'is_available',
-                'available_from',
-                'created_at',
-            ])
+        $categories = Category::latest('id')
             ->when($request->search, function (Builder $query) use ($request) {
                 return $query->where('name', 'like', "%{$request->search}%");
             })
+            ->where('type', 'shop')
+            ->with('parent')
             ->paginate($request->perPage);
-        $products->makeVisible(['is_available', 'available_from'])
-            ->makeHidden(['description']);
 
-        return inertia('Shop/Products/Index', [
-            'products' => fn () => $products,
+        return inertia('Shop/Categories/Index', [
+            'categories' => fn() => CategoryResource::collection($categories),
         ]);
     }
 
@@ -60,7 +48,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show(Category $category)
     {
         //
     }
@@ -68,7 +56,7 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Product $product)
+    public function edit(Category $category)
     {
         //
     }
@@ -76,7 +64,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Category $category)
     {
         //
     }
@@ -84,7 +72,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy(Category $category)
     {
         //
     }

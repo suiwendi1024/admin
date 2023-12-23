@@ -21,8 +21,8 @@ class Order extends Model
         'updated_at',
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:i:s',
+    protected $with = [
+        'customer',
     ];
 
     /**

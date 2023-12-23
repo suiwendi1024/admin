@@ -1,38 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\Blog;
+namespace App\Http\Controllers\Admin\Blog;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Http\Resources\Admin\Blog\AuthorResource;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
-class CategoryController extends Controller
+class AuthorController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $categories = Category::latest('id')
-            ->select([
-                'id',
-                'name',
-                'parent_name' => Category::select('name')
-                    ->whereColumn('c.id', 'categories.parent_id')
-                    ->limit(1)
-                    ->from('categories as c'),
-                'description',
-                'created_at',
-            ])
+        $authors = User::latest('id')
+            ->has('posts')
             ->when($request->search, function (Builder $query) use ($request) {
                 return $query->where('name', 'like', "%{$request->search}%");
             })
-            ->where('type', 'blog')
             ->paginate($request->perPage);
 
-        return inertia('Blog/Categories/Index', [
-            'categories' => fn() => $categories,
+        return inertia('Blog/Authors/Index', [
+            'authors' => fn() => AuthorResource::collection($authors),
         ]);
     }
 
@@ -55,7 +47,7 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show(User $user)
     {
         //
     }
@@ -63,7 +55,7 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Category $category)
+    public function edit(User $user)
     {
         //
     }
@@ -71,7 +63,7 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, User $user)
     {
         //
     }
@@ -79,7 +71,7 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(User $user)
     {
         //
     }

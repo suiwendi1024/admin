@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Shop;
+namespace App\Http\Controllers\Admin\Blog;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\Blog\CategoryResource;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
 class CategoryController extends Controller
 {
@@ -15,24 +17,15 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $categories = Category::latest('id')
-            ->select([
-                'id',
-                'name',
-                'parent_name' => Category::select('name')
-                    ->whereColumn('c.id', 'categories.parent_id')
-                    ->limit(1)
-                    ->from('categories as c'),
-                'description',
-                'created_at',
-            ])
             ->when($request->search, function (Builder $query) use ($request) {
                 return $query->where('name', 'like', "%{$request->search}%");
             })
-            ->where('type', 'shop')
+            ->where('type', 'blog')
+            ->with('parent')
             ->paginate($request->perPage);
 
-        return inertia('Shop/Categories/Index', [
-            'categories' => fn() => $categories,
+        return inertia('Blog/Categories/Index', [
+            'categories' => fn() => CategoryResource::collection($categories),
         ]);
     }
 

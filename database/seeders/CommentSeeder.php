@@ -24,5 +24,17 @@ class CommentSeeder extends Seeder
                 ->for($posts->random(), 'commentable')
                 ->create();
         }
+
+        $comments = Comment::all();
+
+        for ($i = 0; $i < 200; $i++) {
+            /** @var Comment $parent */
+            $parent = $comments->random();
+            Comment::factory()
+                ->for($users->random(), 'owner')
+                ->for($parent, 'parent')
+                ->for($parent->commentable, 'commentable')
+                ->create();
+        }
     }
 }

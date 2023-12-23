@@ -26,11 +26,11 @@ const menu = [
 // 生成菜单项的网址和 active 状态的路由
 menu.forEach(group => {
     group.items.forEach(item => {
-        let prefix = `${group.summary.name.toLowerCase()}.${item.name.toLowerCase()}.`
-        let routeName = prefix + 'index'
+        let routePrefix = `${group.summary.name.toLowerCase()}.${item.name.toLowerCase()}.`
+        let routeName = routePrefix + 'index'
 
         item.href = route().has(routeName) ? route(routeName) : ''
-        item.route = prefix + '*'
+        item.route = routePrefix + '*'
     })
 });
 
@@ -38,11 +38,12 @@ menu.forEach(group => {
 const modules = import.meta.glob('../Components/Icons/*.vue')
 
 // 根据菜单项的图标名称，定义相应的组件
+let iconPath = '../Components/Icons/'
 menu.forEach(group => {
-    group.summary.component = defineAsyncComponent(modules[`../Components/Icons/${group.summary.icon}.vue`])
+    group.summary.component = defineAsyncComponent(modules[`${iconPath}${group.summary.icon}.vue`])
 
     group.items.forEach(item => {
-        item.component = defineAsyncComponent(modules[`../Components/Icons/${item.icon}.vue`])
+        item.component = defineAsyncComponent(modules[`${iconPath}${item.icon}.vue`])
     })
 });
 </script>

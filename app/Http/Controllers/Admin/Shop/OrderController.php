@@ -1,33 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\Blog;
+namespace App\Http\Controllers\Admin\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\Shop\OrderResource;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
-class AuthorController extends Controller
+class OrderController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $authors = User::latest('id')
-            ->has('posts')
+        $orders = Order::latest('id')
             ->when($request->search, function (Builder $query) use ($request) {
-                return $query->where('name', 'like', "%{$request->search}%");
+                return $query->whereHas('customer', function (Builder $q) use ($request) {
+                    return $q->where('name', 'like', "%{$request->search}%");
+                });
             })
             ->paginate($request->perPage);
-        $authors->makeHidden([
-            'email_verified_at',
-            'created_at',
-            'updated_at',
-        ]);
 
-        return inertia('Blog/Authors/Index', [
-            'authors' => fn() => $authors,
+        return inertia('Shop/Orders/Index', [
+            'orders' => fn() => OrderResource::collection($orders),
         ]);
     }
 
@@ -50,7 +49,7 @@ class AuthorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(Order $order)
     {
         //
     }
@@ -58,7 +57,7 @@ class AuthorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(Order $order)
     {
         //
     }
@@ -66,7 +65,7 @@ class AuthorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, Order $order)
     {
         //
     }
@@ -74,7 +73,7 @@ class AuthorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(Order $order)
     {
         //
     }

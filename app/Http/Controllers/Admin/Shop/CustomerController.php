@@ -1,42 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\Blog;
+namespace App\Http\Controllers\Admin\Shop;
 
 use App\Http\Controllers\Controller;
-use App\Models\Comment;
+use App\Http\Resources\Admin\Shop\CustomerResource;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
-class CommentController extends Controller
+class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $comments = Comment::latest('id')
-            ->select([
-                'id',
-                'owner_name' => User::select('name')
-                    ->whereColumn('users.id', 'user_id')
-                    ->limit(1),
-                'content',
-                'created_at'
-            ])
+        $customers = User::latest('id')
+            ->has('orders')
             ->when($request->search, function (Builder $query) use ($request) {
-                return $query->whereHas('owner', function (Builder $q) use ($request) {
-                    return $q->where('name', 'like', "%{$request->search}%");
-                });
+                return $query->where('name', 'like', "%{$request->search}%");
             })
             ->paginate($request->perPage);
-        $comments->makeHidden([
-            'updated_at',
-            'owner',
-        ]);
 
-        return inertia('Blog/Comments/Index', [
-            'comments' => fn() => $comments,
+        return inertia('Shop/Customers/Index', [
+            'customers' => fn() => CustomerResource::collection($customers),
         ]);
     }
 
@@ -59,7 +47,7 @@ class CommentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Comment $comment)
+    public function show(User $user)
     {
         //
     }
@@ -67,7 +55,7 @@ class CommentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Comment $comment)
+    public function edit(User $user)
     {
         //
     }
@@ -75,7 +63,7 @@ class CommentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Comment $comment)
+    public function update(Request $request, User $user)
     {
         //
     }
@@ -83,7 +71,7 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Comment $comment)
+    public function destroy(User $user)
     {
         //
     }

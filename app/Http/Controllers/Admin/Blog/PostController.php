@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Blog;
+namespace App\Http\Controllers\Admin\Blog;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\Blog\PostResource;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
 class PostController extends Controller
 {
@@ -17,31 +19,13 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $posts = Post::latest('id')
-            ->select([
-                'id',
-                'title',
-                'author_name' => User::select('name')
-                    ->whereColumn('users.id', 'user_id')
-                    ->limit(1),
-                'category' => Category::select('name')
-                    ->whereColumn('categories.id', 'category_id')
-                    ->limit(1),
-                'is_published',
-                'is_locked',
-                'created_at',
-                'updated_at',
-            ])
             ->when($request->search, function (Builder $query) use ($request) {
                 return $query->where('title', 'like', "%{$request->search}%");
             })
             ->paginate($request->perPage);
-        $posts->makeHidden([
-            'content',
-            'author',
-        ]);
 
         return inertia('Blog/Posts/Index', [
-            'posts' => fn() => $posts,
+            'posts' => fn() => PostResource::collection($posts),
         ]);
     }
 

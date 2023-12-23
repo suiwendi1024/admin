@@ -1,33 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\Shop;
+namespace App\Http\Controllers\Admin\Blog;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\Blog\CommentResource;
+use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use function inertia;
 
-class CustomerController extends Controller
+class CommentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $customers = User::latest('id')
-            ->has('orders')
+        $comments = Comment::latest('id')
             ->when($request->search, function (Builder $query) use ($request) {
-                return $query->where('name', 'like', "%{$request->search}%");
+                return $query->whereHas('owner', function (Builder $q) use ($request) {
+                    return $q->where('name', 'like', "%{$request->search}%");
+                });
             })
             ->paginate($request->perPage);
-        $customers->makeHidden([
-            'email_verified_at',
-            'created_at',
-            'updated_at',
-        ]);
 
-        return inertia('Shop/Customers/Index', [
-            'customers' => fn() => $customers,
+        return inertia('Blog/Comments/Index', [
+            'comments' => fn() => CommentResource::collection($comments),
         ]);
     }
 
@@ -50,7 +49,7 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(Comment $comment)
     {
         //
     }
@@ -58,7 +57,7 @@ class CustomerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(Comment $comment)
     {
         //
     }
@@ -66,7 +65,7 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, Comment $comment)
     {
         //
     }
@@ -74,7 +73,7 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(Comment $comment)
     {
         //
     }
